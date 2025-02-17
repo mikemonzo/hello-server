@@ -1,0 +1,12 @@
+services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    environment:
+      - REDIS_HOST=localhost
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=password
+      - REDIS_DB=2
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass password
