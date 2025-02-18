@@ -1,7 +1,24 @@
 services:
-  redis:
+  hello-app:
+    build: .
+    container_name: gofr-app
+    environment:
+      - APP_NAME=test-service
+      - HTTP_PORT=9000
+      - REDIS_HOST=gofr-redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=password
+      - REDIS_DB=2
+    ports:
+      - "9000:9000" 
+    depends_on:
+      - gofr-redis
+    networks:
+      - gofr-network
+
+  gofr-redis:
     image: redis:latest
-    container_name: redis
+    container_name: gofr-redis
     environment:
       - REDIS_HOST=localhost
       - REDIS_PORT=6379
@@ -10,3 +27,9 @@ services:
     ports:
       - "6379:6379"
     command: redis-server --requirepass password
+    networks:
+      - gofr-network
+
+networks:
+  gofr-network:
+    driver: bridge
