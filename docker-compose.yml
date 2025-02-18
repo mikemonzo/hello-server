@@ -4,15 +4,21 @@ services:
     container_name: gofr-app
     environment:
       - APP_NAME=test-service
+      - TRACE_EXPORTER=gofr
+      - TRACER_RATIO=0.1
       - HTTP_PORT=9000
       - REDIS_HOST=gofr-redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=password
       - REDIS_DB=2
     ports:
-      - "9000:9000" 
+      - "9000:9000"
+      - "2121:2121" 
     depends_on:
       - gofr-redis
+      - gofr-postgres
+      - grafana
+      - prometheus
     networks:
       - gofr-network
 
@@ -27,6 +33,39 @@ services:
     ports:
       - "6379:6379"
     command: redis-server --requirepass password
+    networks:
+      - gofr-network
+
+  gofr-postgres:
+    image: postgres:latest
+    container_name: gofr-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=gofr
+    ports:
+      - "5432:5432"
+    networks:
+      - gofr-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=password
+    volumes:
+      - ./provisioning:/etc/grafana/provisioning
+    networks:
+      - gofr-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus:/etc/prometheus
     networks:
       - gofr-network
 
